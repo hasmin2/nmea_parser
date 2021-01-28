@@ -2,6 +2,7 @@ package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.CURSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -18,7 +19,8 @@ public class CURParser implements NMEA_Parser{
     @Override
     public Map<String, Object> parse() {
         Map<String, Object> result = new HashMap<>();
-        result.put(NMEAParserConstants.SPEED_WATER_SPD, message.getCurrentSpeed());
+        try{ result.put(NMEAParserConstants.SPEED_WATER_SPD, message.getCurrentSpeed());}
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
         return result;
     }
 }

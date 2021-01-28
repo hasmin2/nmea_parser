@@ -1,6 +1,7 @@
 package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -18,7 +19,8 @@ public class HDMParser implements NMEA_Parser{
     public Map<String, Object> parse() {
     message.getHeading();
         Map<String, Object> result = new HashMap<>();
-
+        try {}
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
         return result;
     }
 }

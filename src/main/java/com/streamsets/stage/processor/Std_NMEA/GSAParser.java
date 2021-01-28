@@ -2,6 +2,7 @@ package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.GSASentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -17,8 +18,9 @@ public class GSAParser implements NMEA_Parser{
 
     @Override
     public Map<String, Object> parse() {
-        message.getHorizontalDOP();
         Map<String, Object> result = new HashMap<>();
+        try {}
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
         return result;
     }
 }

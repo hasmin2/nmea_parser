@@ -51,26 +51,13 @@
             <version>${slf4j.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--dependency>
-            <groupId>dk.dma.ais.lib</groupId>
-            <artifactId>ais-lib-messages</artifactId>
-            <version>2.4</version>
-        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
         <dependency>
-            <groupId>dk.dma.enav</groupId>
-            <artifactId>enav-model</artifactId>
-            <version>0.6</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>dk.dma.commons</groupId>
-            <artifactId>dma-commons-util</artifactId>
-            <version>0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>dk.dma.commons</groupId>
-            <artifactId>dma-commons-management</artifactId>
-            <version>0.5</version>
-        </dependency-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -106,6 +93,12 @@
             <artifactId>streamsets-datacollector-sdk</artifactId>
             <version>${streamsets.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.streamsets</groupId>
+            <artifactId>streamsets-datacollector-sdk</artifactId>
+            <version>3.21.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
 

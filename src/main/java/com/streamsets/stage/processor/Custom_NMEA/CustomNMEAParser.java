@@ -1,9 +1,11 @@
 package com.streamsets.stage.processor.Custom_NMEA;
 
-import java.util.List;
+import com.streamsets.pipeline.api.Field;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.util.Map;
 
 public interface CustomNMEAParser {
     void init(Map<String, String> inputValue);
-    Map <String, Object> parse(String message);
+    Map <String, Field> parse(String message);
 }

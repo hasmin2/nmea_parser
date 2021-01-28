@@ -1,19 +1,31 @@
 package com.streamsets.stage.lib;
 
 public final class NMEAParserConstants {
-    //////////////////////
-    //Descriptions
-    //////////////////////
-
-    public static final String STAGE_ICON = "default.png";
-    public static final String STAGE_HELP_URL = "";
-
-
+    public static final String H2_URL = "jdbc:h2:mem:nmeaparser";
     public static final String VDR_MODEL_DESC = "Set VDR model to fit the prefix of NMEA sentence";
     public static final String NMEA_PARSER_DESC = "Put NMEA sentence that to be parsed";
     //////////////////////
     //VDM property strings
     //////////////////////
+    public static final String AIS_MMSI = "AisMmsi";
+    public static final String AIS_DRAFT = "AisDraft";
+    public static final String AIS_ETA = "AisEta";
+    public static final String AIS_PORT = "AisPort";
+    public static final String AIS_LAT = "AisLat";
+    public static final String AIS_LON = "AisLon";
+    public static final String AIS_SOG = "AisSog";
+    public static final String AIS_SPEED = "AisSPEED";
+    public static final String AIS_DEPTH = "AisWaterDepth";
+    public static final String AIS_HEADING = "AisHeading";
+    public static final String AIS_COG = "AisCog";
+    public static final String AIS_CALLSIGN = "AisCallsign";
+    public static final String AIS_VESSEL_NAME = "AisVslName";
+    public static final String AIS_DESTINATION = "AisDest";
+    public static final String AIS_IMO_NUMBER = "AisImo";
+    public static final String AIS_LAST_SEEN = "AisLastseen";
+    public static final String AIS_VESSEL_FLAG = "AisVslFlag";
+    public static final String AIS_VSL_LENGTH = "AisVslLength";
+    public static final String AIS_VSL_WIDTH = "AisVslWidth";
     public static final String ALTITUDE = "altitude";
     public static final String RPM_ENG_SPEED = "RpmEngineSpd";
     public static final String TIME_UTC_POS = "TimeUtcPos";
@@ -73,21 +85,22 @@ public final class NMEAParserConstants {
     public static final String NAV_DEST_ETA = "NavDestEta";
     public static final String NAV_TOTAL_DIST = "NavTotalDist";
 
-    //////////////////////////
-    //Constants
-    //////////////////////////
-    public static final int DEFAULT_KEPWARE_OFFSET = -1;
-    public static final String ADDRESS_JSON_KEY = "address";
-    public static final String REG_TYPE_JSON_KEY = "registerType";
-    public static final String DEVICE_NAME_JSON_KEY = "deviceName";
-    public static final String VALUE_JSON_KEY = "value";
-
-
     ////////////
     //labels
     ////////
     public static final String VDR_MODEL_LABEL = "VDR Model";
     public static final String NMEA_PARSER_LABEL = "NMEA Parser";
+    public static final String INPUT_FIELD_LABEL = "Input Field Name";
+    //////////////////////
+    //Descriptions
+    //////////////////////
+
+    public static final String STAGE_ICON = "nmea.png";
+    public static final String STAGE_HELP_URL = "";
+    public static final String STAGE_LABEL = "NMEA Parser";
+    public static final String STAGE_DESC = "NMEA Parser w/ AIS decoded message, Should separate AIS data";
+    public static final String INPUT_FIELD_DESC = "Input Field name for parsing";
+
     //MENU values
     public static final String JRC_1800 = "JRC 1800";
     public static final String JRC_1900 = "JRC 1900";

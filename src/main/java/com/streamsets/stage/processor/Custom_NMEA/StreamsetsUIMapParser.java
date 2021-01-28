@@ -1,5 +1,8 @@
 package com.streamsets.stage.processor.Custom_NMEA;
 
+import com.streamsets.pipeline.api.Field;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.util.*;
 
 public class StreamsetsUIMapParser implements CustomNMEAParser{
@@ -15,13 +18,13 @@ public class StreamsetsUIMapParser implements CustomNMEAParser{
     }
   //  Pxxx    Proprietary (Vendor specific)
     @Override
-    public Map<String, Object> parse(String message) {
-        Map<String, Object> result = new HashMap<>();
+    public Map<String, Field> parse(String message) {
+        Map<String, Field> result = new HashMap<>();
         for(String key : parsingHeader.keySet()){
             String [] messageArray = message.split(",");
             if(messageArray[0].equalsIgnoreCase(key)){
                 for(int i=0;i<messageArray.length-1;i++){
-                    result.put(parsingHeader.get(key).get(i), messageArray[i+1]);
+                    result.put(parsingHeader.get(key).get(i), Field.create(messageArray[i+1]));
                 }
             }
         }

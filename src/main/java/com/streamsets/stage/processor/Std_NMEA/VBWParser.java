@@ -2,8 +2,13 @@ package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
+import com.streamsets.stage.processor.Std_NMEA.AIS_NMEA.AIS_Parser;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.VBWSentence;
+import net.sf.marineapi.nmea.util.DataStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,16 +23,24 @@ public class VBWParser implements NMEA_Parser{
     @Override
     public Map<String, Object> parse() {
         Map<String, Object> result = new HashMap<>();
-        result.put(NMEAParserConstants.SPEED_WATER_SPD, message.getLongWaterSpeed());
-        result.put(NMEAParserConstants.SPEED_TRANS_WATER_SPD, message.getTravWaterSpeed());
-        result.put(NMEAParserConstants.SPEED_WATER_SPD_STATUS, message.getWaterSpeedStatus().toChar());
-        result.put(NMEAParserConstants.SPEED_GROUND_SPD, message.getLongGroundSpeed());
-        result.put(NMEAParserConstants.SPEED_TRANS_GROUND_SPD, message.getTravGroundSpeed());
-        result.put(NMEAParserConstants.SPEED_GROUND_SPD_STATUS, message.getGroundSpeedStatus().toChar());
-        result.put(NMEAParserConstants.SPEED_STERN_TRANS_WATER_SPD, message.getSternWaterSpeed());
-        result.put(NMEAParserConstants.SPEED_STERN_WATER_SPD_STATUS, message.getSternWaterSpeedStatus().toChar());
-        result.put(NMEAParserConstants.SPEED_STERN_TRANS_GROUND_SPD, message.getSternGroundSpeed());
-        result.put(NMEAParserConstants.SPEED_STERN_GROUND_SPD_STATUS, message.getSternGroundSpeedStatus());
+        message.getWaterSpeedStatus();
+        if(message.getWaterSpeedStatus().equals(DataStatus.ACTIVE)) {
+            result.put(NMEAParserConstants.SPEED_WATER_SPD, message.getLongWaterSpeed());
+
+        }
+        try{ result.put(NMEAParserConstants.SPEED_TRANS_WATER_SPD, message.getTravWaterSpeed());}
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
+        try{ result.put(NMEAParserConstants.SPEED_TRANS_GROUND_SPD, message.getTravGroundSpeed()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
+        if(message.getGroundSpeedStatus().equals(DataStatus.ACTIVE)) {
+            result.put(NMEAParserConstants.SPEED_GROUND_SPD, message.getLongGroundSpeed());
+        }
+        if (message.getSternWaterSpeedStatus().equals(DataStatus.ACTIVE)) {
+            result.put(NMEAParserConstants.SPEED_STERN_TRANS_WATER_SPD, message.getSternWaterSpeed());
+        }
+        if(message.getSternGroundSpeedStatus().equals(DataStatus.ACTIVE)) {
+            result.put(NMEAParserConstants.SPEED_STERN_TRANS_GROUND_SPD, message.getSternGroundSpeed());
+        }
         return result;
     }
 }

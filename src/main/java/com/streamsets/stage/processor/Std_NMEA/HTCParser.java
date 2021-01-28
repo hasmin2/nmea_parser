@@ -2,6 +2,7 @@ package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.HTCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -19,8 +20,10 @@ public class HTCParser implements NMEA_Parser{
     public Map<String, Object> parse() {
         message.getRateOfTurn();
         Map<String, Object> result = new HashMap<>();
-        result.put(NMEAParserConstants.COURSE_ROT, message.getRateOfTurn());
-        result.put(NMEAParserConstants.COURSE_RUDDER_ANGLE, message.getRudderAngle());
+        try { result.put(NMEAParserConstants.COURSE_ROT, message.getRateOfTurn()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
+        try { result.put(NMEAParserConstants.COURSE_RUDDER_ANGLE, message.getRudderAngle()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
         return result;
     }
 }

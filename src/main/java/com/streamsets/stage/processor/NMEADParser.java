@@ -24,17 +24,17 @@ import java.util.Map;
 
 @StageDef(
         version = 1,
-        label = "NMEA Parser",
-        description = "NMEA Parser w/ AIS decoded message, Should separate AIS data",
-        icon = "default.png",
-        onlineHelpRefUrl = ""
+        label = NMEAParserConstants.STAGE_LABEL,
+        description = NMEAParserConstants.STAGE_DESC,
+        icon = NMEAParserConstants.STAGE_ICON,
+        onlineHelpRefUrl = NMEAParserConstants.STAGE_HELP_URL
 )
 @ConfigGroups(Groups.class)
 @GenerateResourceBundle
 public class NMEADParser extends NMEAParser {
 
     @ConfigDef(
-            required = true,
+            required = false,
             type = ConfigDef.Type.MAP,
             defaultValue = "",
             label = NMEAParserConstants.NMEA_PARSER_LABEL,
@@ -43,6 +43,16 @@ public class NMEADParser extends NMEAParser {
             group = NMEAParserConstants.NMEA_PARSER_MENUSTRING
     )
     public Map<String, String> nmeaMap;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.STRING,
+            defaultValue = "/text",
+            label = NMEAParserConstants.INPUT_FIELD_LABEL,
+            description = NMEAParserConstants.INPUT_FIELD_DESC,
+            displayPosition = 10,
+            group = NMEAParserConstants.NMEA_PARSER_MENUSTRING
+    )
+    public String inputFieldName;
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -62,10 +72,12 @@ public class NMEADParser extends NMEAParser {
     public Map<String, String> getNMEAMap() {
         return nmeaMap;
     }
-
-    public String getVDRModel() {
-        return vdrModel.getLabel();
+    @Override
+    public VdrModel getVDRModel() {
+        return vdrModel;
     }
+    @Override
+    public String getInputFieldName() { return inputFieldName; }
 
 
 }

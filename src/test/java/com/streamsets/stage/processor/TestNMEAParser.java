@@ -32,26 +32,36 @@ public class TestNMEAParser {
     @SuppressWarnings("unchecked")
     public void testProcessor() throws StageException {
         Map<String, String> nmeaString = new HashMap<>();
-        nmeaString.put("$YRSA", "rsa,course,heading,alpha,bravo,charlie");
+        nmeaString.put("$PTKM", "rsa,course,heading,alpha,bravo");
         ProcessorRunner runner = new ProcessorRunner.Builder(NMEADParser.class)
                 .addConfiguration("nmeaMap", nmeaString)
-                .addConfiguration("vdrModel", VdrModel.GENERAL)
+                .addConfiguration("inputFieldName", "/text")
+                .addConfiguration("vdrModel", VdrModel.JRC1800)
                 .addOutputLane("output")
                 .build();
 
         runner.runInit();
         try {
             Record record = RecordCreator.create();
+            Record record2 = RecordCreator.create();
             //record.set(Field.create("$YRSA,0,333,340,A,B,C"));
-            List<Field> inputA = new ArrayList<>();
-            //inputA.add(Field.create("$GPGGA,210230,3855.4487,N,09446.0071,W,1,07,1.1,370.5,M,-29.5,M,,*7A"));
-            inputA.add(Field.create("!AIVDM,2,1,8,A,56;OaD02B8EL990b221`P4v1T4pN0HDpN2222216HHN>B6U30A2hCDhD`888,0*4D"));
-            inputA.add(Field.create("!AIVDM,2,2,8,A,88888888880,2*2C"));
-            //record.set(Field.create("$GPGGA,210230,3855.4487,N,09446.0071,W,1,07,1.1,370.5,M,-29.5,M,,*7A"));
+            Map<String, Field> inputA = new HashMap<>();
+            //inputA.put("text", Field.create("2015/12/04 23:23:02.888,4,$VDVBW,0.0,,A,,,V,,V,,V*68"));
+            inputA.put("text", Field.create("2015/12/04 23:23:13.823,2,!AIVDM,1,1,,A,H6T<770pvs73<@tpL`Tp0000000,2*33"));
+            //inputA.put("text", Field.create("!AIVDM,2,2,8,A,88888888880,2*2C"));
             record.set(Field.create(inputA));
+            Map<String, Field> inputB = new HashMap<>();
+           // inputB.put("text", Field.create("!AIVDM,2,2,8,A,88888888880,2*2C"));
+            //record2.set(Field.create(inputB));
+            record.set(Field.create(inputA));
+            Record [] recordset = new Record[2];
+            recordset[0] = record;
+            //recordset[1] = record2;
             StageRunner.Output output = runner.runProcess(Arrays.asList(record));
-            Assert.assertEquals(1, output.getRecords().get("output").size());
-            Assert.assertEquals(true, output.getRecords().get("output").get(0).get().getValueAsBoolean());
+
+            //Assert.assertEquals(1, output.getRecords().get("output").size());
+            System.out.println(output.getRecords().get("output"));
+            //Assert.assertEquals(true, output.getRecords().get("output").get(0).get().getValueAsString());
 
 
         } finally {
@@ -59,3 +69,4 @@ public class TestNMEAParser {
         }
     }
 }
+

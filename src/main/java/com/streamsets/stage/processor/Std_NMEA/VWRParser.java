@@ -2,6 +2,7 @@ package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.VWRSentence;
 
@@ -18,9 +19,12 @@ public class VWRParser implements NMEA_Parser{
     @Override
     public Map<String, Object> parse() {
         Map<String, Object> result = new HashMap<>();
-        result.put(NMEAParserConstants.SOG_KNOTS, message.getSpeedKnots());
-        result.put(NMEAParserConstants.SOG_KM, message.getSpeedKmh());
-        result.put(NMEAParserConstants.WIND_ANGLE_RELATIVE, message.getWindAngle());
+        try { result.put(NMEAParserConstants.SOG_KNOTS, message.getSpeedKnots()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
+        try { result.put(NMEAParserConstants.SOG_KM, message.getSpeedKmh()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
+        try { result.put(NMEAParserConstants.WIND_ANGLE_RELATIVE, message.getWindAngle()); }
+        catch (DataNotAvailableException de){log.info("One of NMEA Sentence data field is missing {}", message.getClass());}
         return result;
     }
 }

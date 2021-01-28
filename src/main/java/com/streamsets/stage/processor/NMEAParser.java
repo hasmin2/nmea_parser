@@ -18,20 +18,31 @@ package com.streamsets.stage.processor;
 import com.streamsets.pipeline.api.Field;
 import com.streamsets.pipeline.api.Record;
 import com.streamsets.pipeline.api.StageException;
+import com.streamsets.pipeline.api.base.OnRecordErrorException;
 import com.streamsets.pipeline.api.base.SingleLaneRecordProcessor;
 import com.streamsets.stage.lib.Errors;
+import com.streamsets.stage.lib.NMEAParserConstants;
 import com.streamsets.stage.processor.Custom_NMEA.CustomNMEAParser;
 import com.streamsets.stage.processor.Custom_NMEA.StreamsetsUIMapParser;
 import com.streamsets.stage.processor.Std_NMEA.*;
+import com.streamsets.stage.processor.menus.VdrModel;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.parser.UnsupportedSentenceException;
 import net.sf.marineapi.nmea.sentence.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.Null;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public abstract class NMEAParser extends SingleLaneRecordProcessor {
     ////////////////////////////////////////////
-    public static Map<String, TreeMap<Integer, AISSentence>> aisIDs = new HashMap<>();
+    public static Map<String, TreeMap<Integer, AISSentence>> aisIDs;
+    private static final Logger log = LoggerFactory.getLogger(NMEAParser.class);
     /////////////////////////////////////////////////////
     /**
      * Gives access to the UI configuration of the stage provided by the {@link NMEADParser} class.
@@ -44,13 +55,14 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
     @Override
     protected List<ConfigIssue> init() {
         // Validate configuration values and open any required resources.
+        aisIDs = new HashMap<>();
         List<ConfigIssue> issues = super.init();
-        if (getNMEAMap().isEmpty()) {
-            issues.add(
-                    getContext().createConfigIssue(
-                            Groups.NMEAPARSER.name(), "config", Errors.SAMPLE_00, "Here's what's wrong..."
-                    )
-            );
+        if(!getNMEAMap().isEmpty()) {
+            for(String key : getNMEAMap().keySet()) {
+                if (getNMEAMap().get(key).split(",").length == 1) {
+                    issues.add( getContext().createConfigIssue( Groups.NMEAPARSER.name(), "nmeaMap", Errors.NMEA_MAP_INVALID, "Here's what's wrong..."));
+                }
+            }
         }
         // If issues is not empty, the UI will inform the user of each configuration issue in the list.
         return issues;
@@ -61,7 +73,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
      */
     @Override
     public void destroy() {
-        // Clean up any open resources.
+        aisIDs = null;
         super.destroy();
     }
 
@@ -70,100 +82,166 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
      */
     @Override
     protected void process(Record record, SingleLaneBatchMaker batchMaker) throws StageException {
-        String message;// = record.get().getValueAsString();
-        List <Field> list = record.get().getValueAsList();
-        for(Field item: list){
-            message = item.getValueAsString();
-        SentenceFactory sf = SentenceFactory.getInstance();
-        CustomNMEAParser customParser = new StreamsetsUIMapParser();
-        if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) {
-            customParser.init(getNMEAMap());
-        }
+        String message = extractfromRaw(record.get(getInputFieldName()).getValueAsString());
+        Sentence nmeaMessage;
+        Map <String, Field> result = new HashMap<>();
         try {
-            if (sf.createParser(message) instanceof AISSentence) {
-                doParsingJob(new AISParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof APBSentence) {
-                doParsingJob(new APBParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof BODSentence) {
-                doParsingJob(new BODParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof CURSentence) {
-                doParsingJob(new CURParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof DBTSentence) {
-                doParsingJob(new DBTParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof GGASentence) {
-                doParsingJob(new GGAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof GLLSentence) {
-                doParsingJob(new GLLParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof GSASentence) {
-                doParsingJob(new GSAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof HDGSentence) {
-                doParsingJob(new HDGParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof HDMSentence) {
-                doParsingJob(new HDMParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof HDTSentence) {
-                doParsingJob(new HDTParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MDASentence) {
-                doParsingJob(new MDAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MHUSentence) {
-                doParsingJob(new MHUParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MMBSentence) {
-                doParsingJob(new MMBParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MTASentence) {
-                doParsingJob(new MTAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MTASentence) {
-                doParsingJob(new MTAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MTWSentence) {
-                doParsingJob(new MTWParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MWDSentence) {
-                doParsingJob(new MWDParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof MWVSentence) {
-                doParsingJob(new MWVParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof RMBSentence) {
-                doParsingJob(new RMBParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof RMCSentence) {
-                doParsingJob(new RMCParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof ROTSentence) {
-                doParsingJob(new ROTParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof RPMSentence) {
-                doParsingJob(new RPMParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof RSASentence) {
-                doParsingJob(new RSAParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof RTESentence) {
-                doParsingJob(new RTEParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof TTMSentence) {
-                doParsingJob(new TTMParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VBWSentence) {
-                doParsingJob(new VBWParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VDRSentence) {
-                doParsingJob(new VDRParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VHWSentence) {
-                doParsingJob(new VHWParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VLWSentence) {
-                doParsingJob(new VLWParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VTGSentence) {
-                doParsingJob(new VTGParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VWRSentence) {
-                doParsingJob(new VWRParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof VWTSentence) {
-                doParsingJob(new VWTParser(), sf.createParser(message));
-            } else if (sf.createParser(message) instanceof ZDASentence) {
-                doParsingJob(new ZDAParser(), sf.createParser(message));
+            nmeaMessage = SentenceFactory.getInstance().createParser(message);
+            if (nmeaMessage instanceof AISSentence) {
+                result = doParsingJob(new AISParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof APBSentence) {
+                result = doParsingJob(new APBParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof BODSentence) {
+                result = doParsingJob(new BODParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof CURSentence) {
+                result = doParsingJob(new CURParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof DBTSentence) {
+                result = doParsingJob(new DBTParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof DPTSentence) {
+                result = doParsingJob(new DPTParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof GGASentence) {
+                result = doParsingJob(new GGAParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof GLLSentence) {
+                result = doParsingJob(new GLLParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof GSASentence) {
+                result = doParsingJob(new GSAParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof HDGSentence) {
+                result = doParsingJob(new HDGParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof HDMSentence) {
+                result = doParsingJob(new HDMParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof HDTSentence) {
+                result = doParsingJob(new HDTParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MDASentence) {
+                result = doParsingJob(new MDAParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MHUSentence) {
+                result = doParsingJob(new MHUParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MMBSentence) {
+                result = doParsingJob(new MMBParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MTASentence) {
+                result = doParsingJob(new MTAParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MTWSentence) {
+                result = doParsingJob(new MTWParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MWDSentence) {
+                result = doParsingJob(new MWDParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof MWVSentence) {
+                result = doParsingJob(new MWVParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof RMBSentence) {
+                result = doParsingJob(new RMBParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof RMCSentence) {
+                result = doParsingJob(new RMCParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof ROTSentence) {
+                result = doParsingJob(new ROTParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof RPMSentence) {
+                result = doParsingJob(new RPMParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof RSASentence) {
+                result = doParsingJob(new RSAParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof RTESentence) {
+                result = doParsingJob(new RTEParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof TTMSentence) {
+                result = doParsingJob(new TTMParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VBWSentence) {
+                result = doParsingJob(new VBWParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VDRSentence) {
+                result = doParsingJob(new VDRParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VHWSentence) {
+                result = doParsingJob(new VHWParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VLWSentence) {
+                result = doParsingJob(new VLWParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VTGSentence) {
+                result = doParsingJob(new VTGParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VWRSentence) {
+                result = doParsingJob(new VWRParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof VWTSentence) {
+                result = doParsingJob(new VWTParser(), nmeaMessage);
+            } else if (nmeaMessage instanceof ZDASentence) {
+                result = doParsingJob(new ZDAParser(), nmeaMessage);
             }
-        }
-        catch (Exception use){
-            //TODO ANY EXCEPTION should be checked
-            use.printStackTrace();
-            try {
-                customParser.parse(message);
-            } catch (NullPointerException ne){
-                ne.printStackTrace(); //TODO 널포인트 익셉션에 대한 온레코드에러 메시지 출력필요
+        } catch (UnsupportedSentenceException use){
+            if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) {
+                CustomNMEAParser customParser = new StreamsetsUIMapParser();
+                customParser.init(getNMEAMap());
+                result = customParser.parse(message);
+                if (result.isEmpty()){
+                    throw new OnRecordErrorException(Errors.UNSUPPORTED_SENTENCE_INPUT, message);
+                }
             }
+            else {
+                throw new OnRecordErrorException(Errors.CUSTOMPARSER_NONE_EXIST, message);
+            }
+        } catch (IllegalArgumentException ie){
+            throw new OnRecordErrorException(Errors.NMEA_NOT_SUPPORTED_SENTENCE, message.getClass());
+        } catch (IllegalStateException ise){
+            throw new OnRecordErrorException(Errors.NMEA_CHECKSUM_ERROR, message);
         }
-        batchMaker.addRecord(record);
+        if(!result.isEmpty()) {
+            result.put("timestamp", Field.createDate(new Date()));
+            record.set(Field.create(result));
+            batchMaker.addRecord(record);
         }
     }
-    private void doParsingJob(NMEA_Parser parser, Sentence message){
+
+    private String extractfromRaw(String inputValue) {
+        String result = null;
+        switch (getVDRModel()){
+            case JRC1800:
+            case JRC1900:
+                int findstartIndex = inputValue.indexOf(Sentence.BEGIN_CHAR);
+                int findaisIndex = inputValue.indexOf(Sentence.ALTERNATIVE_BEGIN_CHAR);
+                if(findstartIndex > -1) {
+                    result =  inputValue.substring(findstartIndex);
+                }
+                if(findaisIndex > -1){
+                    result = inputValue.substring(findaisIndex);
+                }
+                break;
+            case CONSILLIUM:
+                result = inputValue;
+                break;
+            case FURUNO:
+                result = inputValue;
+                break;
+            case GENERAL:
+                result = inputValue;
+                break;
+        }
+
+        return result;
+    }
+
+    private Map<String, Field> doParsingJob(NMEA_Parser parser, Sentence message){
         parser.init(message);
-        parser.parse();
+        Map<String, Field> result = new HashMap<>();
+        Map<String, Object>  parseResult = parser.parse();
+        for(String key : parseResult.keySet()){
+            Object value = parseResult.get(key);
+            if(value instanceof Boolean){
+                result.put(key, Field.create((boolean)value));
+            } else if(value instanceof Integer){
+                result.put(key, Field.create((int)value));
+            } else if(value instanceof Float){
+                result.put(key, Field.create((float)value));
+            } else if(value instanceof Double){
+                result.put(key, Field.create((double)value));
+            } else if(value instanceof String){
+                result.put(key, Field.create((String)value));
+            } else if(value instanceof Long){
+                result.put(key, Field.create((long)value));
+            } else if(value instanceof Character){
+                result.put(key, Field.create((char) value));
+            } else if(value instanceof Date){
+            result.put(key, Field.createDate((Date) value));
+            } else {
+                try {
+                    throw new OnRecordErrorException(Errors.NOT_SUPPORT_DATA_TYPE, value.getClass());
+                } catch (NullPointerException ne){
+                    result.put(key, Field.create("N/A"));
+                }
+            }
+        }
+        return result;
     }
+
+    public abstract VdrModel getVDRModel();
+
+    public abstract String getInputFieldName();
 }

@@ -43,6 +43,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
     ////////////////////////////////////////////
     public static Map<String, TreeMap<Integer, AISSentence>> aisIDs;
     private static final Logger log = LoggerFactory.getLogger(NMEAParser.class);
+    private boolean decodeAIS;
     /////////////////////////////////////////////////////
     /**
      * Gives access to the UI configuration of the stage provided by the {@link NMEADParser} class.
@@ -56,6 +57,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
     protected List<ConfigIssue> init() {
         // Validate configuration values and open any required resources.
         aisIDs = new HashMap<>();
+        decodeAIS = getDecodeAIS();
         List<ConfigIssue> issues = super.init();
         if(!getNMEAMap().isEmpty()) {
             for(String key : getNMEAMap().keySet()) {
@@ -87,7 +89,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
         Map <String, Field> result = new HashMap<>();
         try {
             nmeaMessage = SentenceFactory.getInstance().createParser(message);
-            if (nmeaMessage instanceof AISSentence) {
+            if (decodeAIS && nmeaMessage instanceof AISSentence) {
                 result = doParsingJob(new AISParser(), nmeaMessage);
             } else if (nmeaMessage instanceof APBSentence) {
                 result = doParsingJob(new APBParser(), nmeaMessage);
@@ -169,7 +171,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
                 throw new OnRecordErrorException(Errors.CUSTOMPARSER_NONE_EXIST, message);
             }
         } catch (IllegalArgumentException ie){
-            throw new OnRecordErrorException(Errors.NMEA_NOT_SUPPORTED_SENTENCE, message.getClass());
+            throw new OnRecordErrorException(Errors.NMEA_NOT_SUPPORTED_SENTENCE, ie.getMessage());
         } catch (IllegalStateException ise){
             throw new OnRecordErrorException(Errors.NMEA_CHECKSUM_ERROR, message);
         }
@@ -244,4 +246,6 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
     public abstract VdrModel getVDRModel();
 
     public abstract String getInputFieldName();
+
+    public abstract boolean getDecodeAIS();
 }

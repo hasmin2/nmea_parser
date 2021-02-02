@@ -55,6 +55,16 @@ public class NMEADParser extends NMEAParser {
     public String inputFieldName;
     @ConfigDef(
             required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "true",
+            label = NMEAParserConstants.AIS_DECODE_LABEL,
+            description = NMEAParserConstants.AIS_DECODE_DESC,
+            displayPosition = 1,
+            group = NMEAParserConstants.NMEA_PARSER_MENUSTRING
+    )
+    public boolean decodeAIS;
+    @ConfigDef(
+            required = true,
             type = ConfigDef.Type.MODEL,
             defaultValue = "GENERAL",
             label = NMEAParserConstants.VDR_MODEL_LABEL,
@@ -78,6 +88,8 @@ public class NMEADParser extends NMEAParser {
     }
     @Override
     public String getInputFieldName() { return inputFieldName; }
+    @Override
+    public boolean getDecodeAIS() { return decodeAIS; }
 
 
 }

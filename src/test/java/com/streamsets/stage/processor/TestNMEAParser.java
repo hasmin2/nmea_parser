@@ -35,6 +35,7 @@ public class TestNMEAParser {
         nmeaString.put("$PTKM", "rsa,course,heading,alpha,bravo");
         ProcessorRunner runner = new ProcessorRunner.Builder(NMEADParser.class)
                 .addConfiguration("nmeaMap", nmeaString)
+                .addConfiguration("decodeAIS", true)
                 .addConfiguration("inputFieldName", "/text")
                 .addConfiguration("vdrModel", VdrModel.JRC1800)
                 .addOutputLane("output")
@@ -46,8 +47,7 @@ public class TestNMEAParser {
             Record record2 = RecordCreator.create();
             //record.set(Field.create("$YRSA,0,333,340,A,B,C"));
             Map<String, Field> inputA = new HashMap<>();
-            //inputA.put("text", Field.create("2015/12/04 23:23:02.888,4,$VDVBW,0.0,,A,,,V,,V,,V*68"));
-            inputA.put("text", Field.create("2015/12/04 23:23:13.823,2,!AIVDM,1,1,,A,H6T<770pvs73<@tpL`Tp0000000,2*33"));
+            inputA.put("text", Field.create("2015/12/04 23:23:02.888,4,$VDVBW,0.0,,A,,,V,,V,,V*68"));
             //inputA.put("text", Field.create("!AIVDM,2,2,8,A,88888888880,2*2C"));
             record.set(Field.create(inputA));
             Map<String, Field> inputB = new HashMap<>();

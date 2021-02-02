@@ -91,10 +91,11 @@ public final class NMEAParserConstants {
     public static final String VDR_MODEL_LABEL = "VDR Model";
     public static final String NMEA_PARSER_LABEL = "NMEA Parser";
     public static final String INPUT_FIELD_LABEL = "Input Field Name";
+    public static final String AIS_DECODE_LABEL = "AIS Output";
     //////////////////////
     //Descriptions
     //////////////////////
-
+    public static final String AIS_DECODE_DESC = "Decodes AIS input if checked. can be increases output  with unnecessary data field";
     public static final String STAGE_ICON = "nmea.png";
     public static final String STAGE_HELP_URL = "";
     public static final String STAGE_LABEL = "NMEA Parser";

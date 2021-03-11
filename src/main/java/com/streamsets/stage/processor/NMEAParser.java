@@ -21,8 +21,8 @@ import com.streamsets.pipeline.api.StageException;
 import com.streamsets.pipeline.api.base.OnRecordErrorException;
 import com.streamsets.pipeline.api.base.SingleLaneRecordProcessor;
 import com.streamsets.stage.lib.Errors;
-import com.streamsets.stage.lib.NMEAParserConstants;
 import com.streamsets.stage.processor.Custom_NMEA.CustomNMEAParser;
+import com.streamsets.stage.processor.Custom_NMEA.ETLParser;
 import com.streamsets.stage.processor.Custom_NMEA.StreamsetsUIMapParser;
 import com.streamsets.stage.processor.Std_NMEA.*;
 import com.streamsets.stage.processor.menus.VdrModel;
@@ -32,11 +32,6 @@ import net.sf.marineapi.nmea.sentence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.Null;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public abstract class NMEAParser extends SingleLaneRecordProcessor {
@@ -84,7 +79,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
      */
     @Override
     protected void process(Record record, SingleLaneBatchMaker batchMaker) throws StageException {
-        String message = extractfromRaw(record.get(getInputFieldName()).getValueAsString());
+        String message = extractFromRaw(record.get(getInputFieldName()).getValueAsString());
         Sentence nmeaMessage;
         Map <String, Field> result = new HashMap<>();
         try {
@@ -159,7 +154,15 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
                 result = doParsingJob(new ZDAParser(), nmeaMessage);
             }
         } catch (UnsupportedSentenceException use){
-            if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) {
+            String header = message.split(",")[0];
+            if(header.contains("ETL")){
+                CustomNMEAParser customParser = new ETLParser();
+                Map<String, String> inputMap = new HashMap<>();
+                inputMap.put(header, message.substring(message.indexOf(',')+1, message.length()-1));
+                customParser.init(inputMap);
+                result = customParser.parse(message);
+            }
+            else if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) {
                 CustomNMEAParser customParser = new StreamsetsUIMapParser();
                 customParser.init(getNMEAMap());
                 result = customParser.parse(message);
@@ -182,7 +185,7 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
         }
     }
 
-    private String extractfromRaw(String inputValue) {
+    private String extractFromRaw(String inputValue) {
         String result = null;
         switch (getVDRModel()){
             case JRC1800:

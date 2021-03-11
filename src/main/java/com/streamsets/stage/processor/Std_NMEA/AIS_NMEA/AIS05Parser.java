@@ -3,7 +3,6 @@ package com.streamsets.stage.processor.Std_NMEA.AIS_NMEA;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.NMEAParserConstants;
 import net.sf.marineapi.ais.message.AISMessage;
-import net.sf.marineapi.ais.message.AISMessage01;
 import net.sf.marineapi.ais.message.AISMessage05;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 
@@ -11,7 +10,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

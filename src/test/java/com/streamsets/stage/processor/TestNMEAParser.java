@@ -47,7 +47,7 @@ public class TestNMEAParser {
             Record record2 = RecordCreator.create();
             //record.set(Field.create("$YRSA,0,333,340,A,B,C"));
             Map<String, Field> inputA = new HashMap<>();
-            inputA.put("text", Field.create("2015/12/04 23:23:02.888,4,$VDVBW,0.0,,A,,,V,,V,,V*68"));
+            inputA.put("text", Field.create("2015/12/04 23:23:02.888,4,$PETL,144703.00,O,3,3,5,1,0"));
             //inputA.put("text", Field.create("!AIVDM,2,2,8,A,88888888880,2*2C"));
             record.set(Field.create(inputA));
             Map<String, Field> inputB = new HashMap<>();

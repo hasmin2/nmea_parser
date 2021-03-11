@@ -1,9 +1,7 @@
 package com.streamsets.stage.processor.Std_NMEA.AIS_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
-import com.streamsets.stage.processor.Std_NMEA.VBWParser;
 import net.sf.marineapi.ais.message.AISMessage;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

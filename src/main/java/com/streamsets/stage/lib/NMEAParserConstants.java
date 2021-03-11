@@ -70,7 +70,7 @@ public final class NMEAParserConstants {
     public static final String ETC_NUM_SATELLITES = "EtcNumSatellites";
     public static final String ETC_GLL_STATUS = "EtcGllStatus";
     public static final String ETC_GLL_MODE_INDICATOR = "EtcGllModeIndicator";
-    public static final String ETC_MESSAGE_TYPE = "EtlMessageType";
+    public static final String ETL_MESSAGE_TYPE = "EtlMessageType";
     public static final String ETL_EVENT_TIME = "EtlEventTime";
     public static final String ETC_AIR_TEMP = "EtcAirTemp";
     public static final String ETC_AIR_HUMID = "EtcAirHumid";

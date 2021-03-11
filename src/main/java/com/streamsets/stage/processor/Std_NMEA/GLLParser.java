@@ -5,7 +5,6 @@ import com.streamsets.stage.lib.NMEAParserConstants;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.util.Datum;
 
 import java.util.HashMap;
 import java.util.Map;

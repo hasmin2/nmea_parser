@@ -1,7 +1,6 @@
 package com.streamsets.stage.processor.Std_NMEA;
 
 import com.streamsets.pipeline.api.StageException;
-import com.streamsets.stage.lib.NMEAParserConstants;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.APBSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;

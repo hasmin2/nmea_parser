@@ -3,8 +3,6 @@ package com.streamsets.stage.processor.Std_NMEA;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.pipeline.api.base.OnRecordErrorException;
 import com.streamsets.stage.lib.Errors;
-import com.streamsets.stage.lib.NMEAParserConstants;
-import com.streamsets.stage.processor.NMEAParser;
 import com.streamsets.stage.processor.Std_NMEA.AIS_NMEA.*;
 import net.sf.marineapi.ais.message.*;
 import net.sf.marineapi.ais.parser.AISMessageFactory;
@@ -13,7 +11,9 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.streamsets.stage.processor.NMEAParser.aisIDs;
 

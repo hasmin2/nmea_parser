@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamsets</groupId>
     <artifactId>nmeaparser</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <properties>
         <streamsets.version>3.22.3</streamsets.version>
@@ -77,7 +77,7 @@
             <groupId>com.streamsets</groupId>
             <artifactId>streamsets-datacollector-sdk</artifactId>
             <version>${streamsets.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
 

@@ -22,9 +22,10 @@ public class StreamsetsUIMapParser implements CustomNMEAParser{
         for(String key : parsingHeader.keySet()){
             String [] messageArray = message.split(",");
             if(messageArray[0].equalsIgnoreCase(key)){
-                for(int i=0;i<messageArray.length-1;i++){
+                for(int i=0;i<messageArray.length-2;i++){
                     result.put(parsingHeader.get(key).get(i), Field.create(messageArray[i+1]));
                 }
+                result.put(parsingHeader.get(key).get(messageArray.length-2), Field.create(messageArray[messageArray.length-1].split("\\*")[0]));
             }
         }
         return result;

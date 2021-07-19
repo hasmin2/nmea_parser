@@ -167,21 +167,15 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
                 customParser.init(inputMap);
                 result = customParser.parse(message);
             }
-            else if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) {
-                CustomNMEAParser customParser = new StreamsetsUIMapParser();
-                customParser.init(getNMEAMap());
-                result = customParser.parse(message);
-                if (result.isEmpty()){
-                    throw new OnRecordErrorException(Errors.UNSUPPORTED_SENTENCE_INPUT, message);
-                }
-            }
+            else if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) { doCustomParsing(message); }
             else {
                 throw new OnRecordErrorException(Errors.CUSTOMPARSER_NONE_EXIST, message);
             }
         } catch (IllegalArgumentException ie){
             throw new OnRecordErrorException(Errors.NMEA_NOT_SUPPORTED_SENTENCE, ie.getMessage());
         } catch (IllegalStateException ise){
-            throw new OnRecordErrorException(Errors.NMEA_CHECKSUM_ERROR, message);
+            if(getNMEAMap()!=null && !getNMEAMap().isEmpty()) { result = doCustomParsing(message); }
+            else { throw new OnRecordErrorException(Errors.NMEA_CHECKSUM_ERROR, message); }
         }
         if(!result.isEmpty()) {
             result.put("timestamp", Field.createDate(new Date()));
@@ -189,7 +183,16 @@ public abstract class NMEAParser extends SingleLaneRecordProcessor {
             batchMaker.addRecord(record);
         }
     }
-
+    private Map<String, Field> doCustomParsing(String message) throws OnRecordErrorException{
+        CustomNMEAParser customParser = new StreamsetsUIMapParser();
+        customParser.init(getNMEAMap());
+        Map <String, Field> result;
+        result = customParser.parse(message);
+        if (result.isEmpty()){
+            throw new OnRecordErrorException(Errors.UNSUPPORTED_SENTENCE_INPUT, message);
+        }
+        return result;
+    }
     private String extractFromRaw(String inputValue) {
         String result = null;
         switch (getVDRModel()){

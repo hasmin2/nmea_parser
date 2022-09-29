@@ -21,6 +21,7 @@ public final class NMEAParserConstants {
     public static final String H2_URL = "jdbc:h2:mem:nmeaparser";
     public static final String VDR_MODEL_DESC = "Set VDR model to fit the prefix of NMEA sentence";
     public static final String NMEA_PARSER_DESC = "Put NMEA sentence that to be parsed";
+    public static final int AIS_MAX_STORE_VESSEL = 500;
     //////////////////////
     //VDM property strings
     //////////////////////

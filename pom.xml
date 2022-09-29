@@ -29,7 +29,18 @@
         <junit.version>4.13</junit.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    <repositories>
+        <repository>
+            <id>public</id>
+            <url>/http://192.168.0.230:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <!-- Core StreamSets Dependencies for Stage Libraries -->
         <!-- Need to be without snapshot at any the point of the release -->

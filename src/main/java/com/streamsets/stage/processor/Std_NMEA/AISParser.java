@@ -3,6 +3,7 @@ package com.streamsets.stage.processor.Std_NMEA;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.pipeline.api.base.OnRecordErrorException;
 import com.streamsets.stage.lib.Errors;
+import com.streamsets.stage.lib.NMEAParserConstants;
 import com.streamsets.stage.processor.Std_NMEA.AIS_NMEA.*;
 import net.sf.marineapi.ais.message.*;
 import net.sf.marineapi.ais.parser.AISMessageFactory;
@@ -23,6 +24,9 @@ public class AISParser implements NMEA_Parser{
     private static final Logger log = LoggerFactory.getLogger(AIS_Parser.class);
     @Override
     public void init(Sentence message) throws StageException {
+        if (aisIDs.size() > NMEAParserConstants.AIS_MAX_STORE_VESSEL) {//주변 선박 받다만게 500개가 넘으면 초기화
+            aisIDs.clear();
+        }
         combineMessage((AISSentence) message);
     }
     private void combineMessage(AISSentence message){
@@ -42,17 +46,17 @@ public class AISParser implements NMEA_Parser{
                     i++;
                 }
                 messageArray = AISMessageFactory.getInstance().create(resultMessage);
-                aisIDs.put(id, new TreeMap<>());//다 보내고 나면 초기화하기
+                aisIDs.remove(id);//다 보내고 나면 초기화하기
             }
             if(aisIDs.get(id).size() > messageSize){
-                aisIDs.put(id, new TreeMap<>());//길이가 안 맞으면 초기화하기
+                aisIDs.remove(id);//길이가 안 맞으면 초기화하기
             }
         }
         else{
             messageArray = AISMessageFactory.getInstance().create(message);
         }
         if(messageArray!=null) {
-            log.debug("Decoded Input AIS Message is: {}", messageArray.toString());
+            log.debug("Decoded Input AIS Message is: {}", messageArray);
         }
     }
 
@@ -80,6 +84,8 @@ public class AISParser implements NMEA_Parser{
                 result = doParsingJob(new AIS21Parser(), messageArray);
             } else if (messageArray instanceof AISMessage24) {
                 result = doParsingJob(new AIS24Parser(), messageArray);
+            } else if (messageArray instanceof AISMessage27) {
+                result = doParsingJob(new AIS27Parser(), messageArray);
             } else {
                 throw new OnRecordErrorException(Errors.NMEA_AIS_NOT_SUPPORTED_SENTENCE, messageArray.toString());
             }
